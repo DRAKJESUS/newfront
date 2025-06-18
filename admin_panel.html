@@ -96,13 +96,7 @@
   </div>
 
 <script>
-  let usuario = null;
-  try {
-    usuario = JSON.parse(localStorage.getItem("usuario"));
-  } catch (e) {
-    console.warn("Usuario inválido en localStorage");
-  }
-
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario || usuario.rol !== 3) {
     location.href = "index.html";
   } else {
@@ -116,10 +110,29 @@
   }
 
   function generarExcel() {
-    const claveM = "ACF-0905";
+    const claveM = "ACF-0905";  // Puedes hacerlo dinámico si quieres
     const numGrup = document.getElementById("grupoSelect").value;
-    const url = `https://asistenback.onrender.com/reportes/excel_asistencias?claveM=${claveM}&numGrup=${numGrup}`;
-    window.open(url, "_blank"); // ✅ Abrir Excel en nueva pestaña
+
+    // 🔗 Ahora apunta al backend de Render
+    const url = `https://report-d183.onrender.com/reportes/excel_asistencias?claveM=${claveM}&numGrup=${numGrup}`;
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error("No se pudo generar el archivo Excel.");
+        return response.blob();
+      })
+      .then(blob => {
+        const a = document.createElement("a");
+        const urlBlob = window.URL.createObjectURL(blob);
+        a.href = urlBlob;
+        a.download = `asistencia_${claveM}_grupo${numGrup}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(error => {
+        alert("Error al generar el Excel: " + error.message);
+      });
   }
 </script>
 
